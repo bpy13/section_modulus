@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>Section Modulus Calculator</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: "Segoe UI", Roboto, Arial, sans-serif;
+      }
+      body {
+        margin: 0;
+        background: #f3f6fb;
+        color: #1f2937;
+      }
+      .app {
+        max-width: 920px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+      .card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
+        padding: 24px;
+      }
+      h1 {
+        margin-top: 0;
+        margin-bottom: 8px;
+        font-size: 1.8rem;
+      }
+      p {
+        margin-top: 0;
+        color: #4b5563;
+      }
+      .controls {
+        display: flex;
+        gap: 16px;
+        align-items: flex-end;
+        flex-wrap: wrap;
+        margin: 20px 0;
+      }
+      label {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        font-size: 0.95rem;
+        min-width: 120px;
+      }
+      .control-label {
+        min-width: 140px;
+      }
+      input,
+      select,
+      button {
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 8px 10px;
+        font-size: 0.95rem;
+      }
+      input[type="number"]::-webkit-outer-spin-button,
+      input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+      input[type="number"] {
+        -moz-appearance: textfield;
+      }
+      button {
+        background: #2563eb;
+        color: white;
+        border: none;
+        cursor: pointer;
+        min-width: 110px;
+      }
+      button:hover {
+        background: #1d4ed8;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 20px;
+        margin-top: 20px;
+      }
+      .panel {
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 16px;
+        background: #fbfdff;
+      }
+      .field-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(120px, 1fr));
+        gap: 12px;
+      }
+      .result {
+        margin-top: 18px;
+        padding: 12px 14px;
+        border-radius: 10px;
+        background: #eff6ff;
+        color: #1d4ed8;
+        font-weight: 600;
+      }
+      .hint {
+        margin-top: 10px;
+        font-size: 0.9rem;
+        color: #6b7280;
+      }
+      .hidden {
+        display: none;
+      }
+      svg {
+        width: 100%;
+        height: 280px;
+        background: white;
+        border-radius: 10px;
+        border: 1px solid #e5e7eb;
+      }
+      @media (max-width: 780px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <section class="card">
+        <h1>Section Modulus Calculator</h1>
+        <p>Choose a section shape, enter the dimensions, and see the calculated section modulus.</p>
+
+        <div class="controls">
+          <label class="control-label">
+            Shape
+            <select id="shapeSelect">
+              <option value="Z">Z-shaped section</option>
+              <option value="G">G-shaped section</option>
+            </select>
+          </label>
+
+          <label class="control-label">
+            Thickness (mm)
+            <input id="thickness" type="number" value="4" />
+          </label>
+
+          <button id="calculateBtn" type="button">Calculate</button>
+        </div>
+
+        <div class="layout">
+          <div class="panel">
+            <div id="zFields" class="field-grid">
+              <label>Left flange (mm) <input id="z-left" type="number" value="10" /></label>
+              <label>Middle web (mm) <input id="z-mid" type="number" value="40" /></label>
+              <label>Right flange (mm) <input id="z-right" type="number" value="20" /></label>
+            </div>
+
+            <div id="gFields" class="field-grid hidden">
+              <label>Top (mm) <input id="g-top" type="number" value="14" /></label>
+              <label>Right (mm) <input id="g-right" type="number" value="12" /></label>
+              <label>Bottom (mm) <input id="g-bot" type="number" value="50" /></label>
+              <label>Left (mm) <input id="g-left" type="number" value="27" /></label>
+            </div>
+
+            <div id="result" class="result">Section modulus: <span id="resultValue">--</span> mm³</div>
+          </div>
+
+          <div class="panel">
+            <div id="imagePlaceholder" style="min-height: 220px; border: 1px dashed #cbd5e1; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #64748b; background: #f8fafc; text-align: center; padding: 16px; overflow: hidden;">
+              <img id="shapeImage" src="Z.png" alt="Section shape" style="max-width: 100%; max-height: 220px; object-fit: contain;" />
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const shapeSelect = document.getElementById("shapeSelect");
+      const thicknessInput = document.getElementById("thickness");
+      const zFields = document.getElementById("zFields");
+      const gFields = document.getElementById("gFields");
+      const resultValue = document.getElementById("resultValue");
+      const calculateBtn = document.getElementById("calculateBtn");
+      const imagePlaceholder = document.getElementById("imagePlaceholder");
+      const shapeImage = document.getElementById("shapeImage");
+
+      function zSectionModulus(left, mid, right, thick) {
+        let y0 = right * (right + thick) / 2 - left * (left + thick) / 2;
+        y0 /= right + mid + left;
+        let Ix = mid * ((thick / 2 - y0) ** 3 - (-thick / 2 - y0) ** 3) / 3;
+        Ix += thick * ((thick / 2 + right - y0) ** 3 - (thick / 2 - y0) ** 3) / 3;
+        Ix += thick * ((-thick / 2 - y0) ** 3 - (-thick / 2 - left - y0) ** 3) / 3;
+        return Ix / Math.max(right + thick / 2 - y0, left + thick / 2 + y0);
+      }
+
+      function gSectionModulus(top, right, bot, left, thick) {
+        let y0 = top * (left + thick) / 2 - bot * (left + thick) / 2 - right * (left - right) / 2;
+        y0 /= top + right + bot + left;
+        let Ix = top * ((left / 2 + thick - y0) ** 3 - (left / 2 - y0) ** 3) / 3;
+        Ix += bot * ((-left / 2 - y0) ** 3 - (-left / 2 - thick - y0) ** 3) / 3;
+        Ix += thick * ((right - left / 2 - y0) ** 3 - (-left / 2 - y0) ** 3) / 3;
+        return Ix / (left / 2 + thick);
+      }
+
+      function updateShapeInputs() {
+        const isZ = shapeSelect.value === "Z";
+        zFields.classList.toggle("hidden", !isZ);
+        gFields.classList.toggle("hidden", isZ);
+        shapeImage.src = isZ ? "Z.png" : "G.png";
+        shapeImage.alt = isZ ? "Z-shaped section" : "G-shaped section";
+      }
+
+      function readNumber(id) {
+        const value = Number(document.getElementById(id).value);
+        return Number.isFinite(value) ? value : NaN;
+      }
+
+      function calculate() {
+        const thick = readNumber("thickness");
+        if (!Number.isFinite(thick) || thick <= 0) {
+          resultValue.textContent = "Enter a valid thickness";
+          return;
+        }
+
+        if (shapeSelect.value === "Z") {
+          const left = readNumber("z-left");
+          const mid = readNumber("z-mid");
+          const right = readNumber("z-right");
+
+          if ([left, mid, right].some((value) => !Number.isFinite(value))) {
+            resultValue.textContent = "Enter valid values";
+            return;
+          }
+
+          const modulus = zSectionModulus(left, mid, right, thick);
+          resultValue.textContent = modulus.toFixed(4);
+        } else {
+          const top = readNumber("g-top");
+          const right = readNumber("g-right");
+          const bot = readNumber("g-bot");
+          const left = readNumber("g-left");
+
+          if ([top, right, bot, left].some((value) => !Number.isFinite(value))) {
+            resultValue.textContent = "Enter valid values";
+            return;
+          }
+
+          const modulus = gSectionModulus(top, right, bot, left, thick);
+          resultValue.textContent = modulus.toFixed(4);
+        }
+      }
+
+      shapeSelect.addEventListener("change", () => {
+        updateShapeInputs();
+        calculate();
+      });
+      calculateBtn.addEventListener("click", calculate);
+      [thicknessInput, document.getElementById("z-left"), document.getElementById("z-mid"), document.getElementById("z-right"), document.getElementById("g-top"), document.getElementById("g-right"), document.getElementById("g-bot"), document.getElementById("g-left")].forEach((input) => {
+        input.addEventListener("input", calculate);
+      });
+
+      updateShapeInputs();
+      calculate();
+    </script>
+  </body>
+</html>
