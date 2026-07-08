@@ -202,6 +202,7 @@
         let Ix = top * ((left / 2 + thick - y0) ** 3 - (left / 2 - y0) ** 3) / 3;
         Ix += bot * ((-left / 2 - y0) ** 3 - (-left / 2 - thick - y0) ** 3) / 3;
         Ix += thick * ((right - left / 2 - y0) ** 3 - (-left / 2 - y0) ** 3) / 3;
+        Ix += thick * ((left / 2 - y0) ** 3 - (-left / 2 - y0) ** 3) / 3;
         return Ix / (left / 2 + thick);
       }
 
