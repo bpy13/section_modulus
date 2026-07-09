@@ -139,6 +139,7 @@
             <select id="shapeSelect">
               <option value="Z">Z-shaped section</option>
               <option value="G">G-shaped section</option>
+              <option value="Z90">Rotated Z-shaped section</option>
             </select>
           </label>
 
@@ -165,6 +166,12 @@
               <label>Left (mm) <input id="g-left" type="number" value="27" /></label>
             </div>
 
+            <div id="z90Fields" class="field-grid hidden">
+              <label>Left flange (mm) <input id="z90-top" type="number" value="10" /></label>
+              <label>Middle web (mm) <input id="z90-mid" type="number" value="40" /></label>
+              <label>Right flange (mm) <input id="z90-bot" type="number" value="20" /></label>
+            </div>
+
             <div id="result" class="result">Section modulus: <span id="resultValue">--</span> mm³</div>
           </div>
 
@@ -182,6 +189,7 @@
       const thicknessInput = document.getElementById("thickness");
       const zFields = document.getElementById("zFields");
       const gFields = document.getElementById("gFields");
+      const z90Fields = document.getElementById("z90Fields");
       const resultValue = document.getElementById("resultValue");
       const calculateBtn = document.getElementById("calculateBtn");
       const imagePlaceholder = document.getElementById("imagePlaceholder");
@@ -203,15 +211,27 @@
         Ix += bot * ((-left / 2 - y0) ** 3 - (-left / 2 - thick - y0) ** 3) / 3;
         Ix += thick * ((right - left / 2 - y0) ** 3 - (-left / 2 - y0) ** 3) / 3;
         Ix += thick * ((left / 2 - y0) ** 3 - (-left / 2 - y0) ** 3) / 3;
-        return Ix / (left / 2 + thick);
+        return Ix / (left / 2 + thick + Math.abs(y0));
+      }
+
+      function zRot90SectionModulus(top, mid, bot, thick) {
+        let y0 = top * (mid + thick) / 2 - bot * (mid + thick) / 2;
+        y0 /= top + mid + bot;
+        let Ix = thick * ((mid / 2 - y0) ** 3 - (-mid / 2 - y0) ** 3) / 3;
+        Ix += top * ((mid / 2 + thick - y0) ** 3 - (mid / 2 - y0) ** 3) / 3;
+        Ix += bot * ((-mid / 2 - y0) ** 3 - (-mid / 2 - thick - y0) ** 3) / 3;
+        return Ix / Math.max(mid / 2 + (bot > 0 ? thick : 0) + y0, mid / 2 + (top > 0 ? thick : 0) - y0);
       }
 
       function updateShapeInputs() {
         const isZ = shapeSelect.value === "Z";
+        const isG = shapeSelect.value === "G";
         zFields.classList.toggle("hidden", !isZ);
-        gFields.classList.toggle("hidden", isZ);
-        shapeImage.src = isZ ? "Z.png" : "G.png";
-        shapeImage.alt = isZ ? "Z-shaped section" : "G-shaped section";
+        gFields.classList.toggle("hidden", !isG);
+        z90Fields.classList.toggle("hidden", !(shapeSelect.value === "Z90"));
+        const imageName = shapeSelect.value === "G" ? "G.png" : shapeSelect.value === "Z90" ? "Z_rot.png" : "Z.png";
+        shapeImage.src = `${imageName}?v=${Date.now()}`;
+        shapeImage.alt = shapeSelect.value === "G" ? "G-shaped section" : shapeSelect.value === "Z90" ? "Rotated Z-shaped section" : "Z-shaped section";
       }
 
       function readNumber(id) {
@@ -238,7 +258,7 @@
 
           const modulus = zSectionModulus(left, mid, right, thick);
           resultValue.textContent = modulus.toFixed(4);
-        } else {
+        } else if (shapeSelect.value === "G") {
           const top = readNumber("g-top");
           const right = readNumber("g-right");
           const bot = readNumber("g-bot");
@@ -251,6 +271,18 @@
 
           const modulus = gSectionModulus(top, right, bot, left, thick);
           resultValue.textContent = modulus.toFixed(4);
+        } else {
+          const top = readNumber("z90-top");
+          const mid = readNumber("z90-mid");
+          const bot = readNumber("z90-bot");
+
+          if ([top, mid, bot].some((value) => !Number.isFinite(value))) {
+            resultValue.textContent = "Enter valid values";
+            return;
+          }
+
+          const modulus = zRot90SectionModulus(top, mid, bot, thick);
+          resultValue.textContent = modulus.toFixed(4);
         }
       }
 
@@ -259,7 +291,7 @@
         calculate();
       });
       calculateBtn.addEventListener("click", calculate);
-      [thicknessInput, document.getElementById("z-left"), document.getElementById("z-mid"), document.getElementById("z-right"), document.getElementById("g-top"), document.getElementById("g-right"), document.getElementById("g-bot"), document.getElementById("g-left")].forEach((input) => {
+      [thicknessInput, document.getElementById("z-left"), document.getElementById("z-mid"), document.getElementById("z-right"), document.getElementById("g-top"), document.getElementById("g-right"), document.getElementById("g-bot"), document.getElementById("g-left"), document.getElementById("z90-top"), document.getElementById("z90-mid"), document.getElementById("z90-bot")].forEach((input) => {
         input.addEventListener("input", calculate);
       });
 
