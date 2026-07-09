@@ -229,8 +229,7 @@
         zFields.classList.toggle("hidden", !isZ);
         gFields.classList.toggle("hidden", !isG);
         z90Fields.classList.toggle("hidden", !(shapeSelect.value === "Z90"));
-        const imageName = shapeSelect.value === "G" ? "G.png" : shapeSelect.value === "Z90" ? "Z_rot.png" : "Z.png";
-        shapeImage.src = `${imageName}?v=${Date.now()}`;
+        shapeImage.src = shapeSelect.value === "G" ? "G.png" : shapeSelect.value === "Z90" ? "Z_rot.png" : "Z.png";
         shapeImage.alt = shapeSelect.value === "G" ? "G-shaped section" : shapeSelect.value === "Z90" ? "Rotated Z-shaped section" : "Z-shaped section";
       }
 
