@@ -25,7 +25,7 @@ The implementation follows the standard procedure for composite sections:
 - Compute the centroid of each rectangle and combine them to get the overall centroid:
 
 $$
-y_0 = \frac{\int y\,dA}{\int dA}
+y_0 = \frac{\int y\ dA}{\int dA}
 $$
 
 where $dA$ is the differential area element and $y$ is its vertical coordinate relative to the chosen origin.
@@ -34,7 +34,7 @@ where $dA$ is the differential area element and $y$ is its vertical coordinate r
 - The final second moment of area is the integral over the entire section of the squared distance from the centroidal axis:
 
 $$
-I = \int (y - y_0)^2\,dA
+I = \int (y - y_0)^2\ dA
 $$
 
 This value is independent of the original coordinate choice, because shifting the origin only changes the intermediate terms and the centroid location consistently.
