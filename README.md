@@ -61,3 +61,5 @@ Note that the integrals for each component were already solved and directly expr
 ## Run locally
 
 Open [index.html](index.html) in your browser, or serve the folder with a simple web server.
+
+You can also test the live version here: https://bpy13.github.io/section_modulus/
