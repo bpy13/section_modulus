@@ -1,0 +1,18 @@
+[project]
+name = "section_modulus"
+version = "0.1.0"
+description = "Section modulus of thin-walled Z, G and rotated-Z beam sections"
+requires-python = ">=3.10"
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.5"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = [".", "tests"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B"]
