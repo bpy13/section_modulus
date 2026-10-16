@@ -57,9 +57,34 @@ Note that the integrals for each component were already solved and directly expr
 
 - [section_modulus.py](section_modulus.py): Python implementation of the section modulus calculations for the supported profiles.
 - [index.html](index.html): A simple web page that visualizes the shapes and displays the computed values.
+- [tests/](tests): pytest tests, including the independent reference calculation.
+
+## Input rules
+
+All lengths use the same unit (for example mm); the result is in that unit cubed.
+
+- Thickness must be greater than 0.
+- Lengths must be 0 or more (a 0 means that part is left out, for example a G section with no top flange).
+- At least one length must be greater than 0.
+
+The Python functions raise `ValueError` for inputs that break these rules; the web page shows a message instead of a result.
 
 ## Run locally
 
 Open [index.html](index.html) in your browser, or serve the folder with a simple web server.
 
 You can also test the live version here: https://bpy13.github.io/section_modulus/
+
+## Run the tests
+
+In PowerShell, from the repo folder:
+
+```powershell
+conda env create -f environment.yml   # first time only
+conda activate section_modulus
+python -m pytest
+ruff check .
+ruff format --check .
+```
+
+The tests compare every shape with an independent calculation (rectangles plus the parallel-axis theorem) in [tests/reference.py](tests/reference.py). The web page has its own JavaScript copy of the formulas; [tests/test_js_parity.py](tests/test_js_parity.py) runs that copy with Node.js and checks it gives the same results as Python. That test is skipped, with a message, if Node.js is not installed.
