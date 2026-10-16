@@ -167,10 +167,13 @@
             </div>
 
             <div id="z90Fields" class="field-grid hidden">
-              <label>Left flange (mm) <input id="z90-top" type="number" value="10" /></label>
+              <label>Top flange (mm) <input id="z90-top" type="number" value="10" /></label>
               <label>Middle web (mm) <input id="z90-mid" type="number" value="40" /></label>
-              <label>Right flange (mm) <input id="z90-bot" type="number" value="20" /></label>
+              <label>Bottom flange (mm) <input id="z90-bot" type="number" value="20" /></label>
             </div>
+            <div id="z90Hint" class="hint hidden">In the picture the top flange is labelled "Right" and the bottom flange "Left".</div>
+
+            <div class="hint">Lengths must be 0 or more, with at least one above 0. Thickness must be above 0.</div>
 
             <div id="result" class="result">Section modulus: <span id="resultValue">--</span> mm³</div>
           </div>
@@ -211,7 +214,11 @@
         Ix += bot * ((-left / 2 - y0) ** 3 - (-left / 2 - thick - y0) ** 3) / 3;
         Ix += thick * ((right - left / 2 - y0) ** 3 - (-left / 2 - y0) ** 3) / 3;
         Ix += thick * ((left / 2 - y0) ** 3 - (-left / 2 - y0) ** 3) / 3;
-        return Ix / (left / 2 + thick + Math.abs(y0));
+        // Extreme fibres: a flange only adds its thickness if it exists, and the right
+        // beam (which rises from the bottom flange) can stick out above the top edge.
+        const yTop = Math.max(left / 2 + (top > 0 ? thick : 0), right - left / 2);
+        const yBot = -left / 2 - (bot > 0 ? thick : 0);
+        return Ix / Math.max(yTop - y0, y0 - yBot);
       }
 
       function zRot90SectionModulus(top, mid, bot, thick) {
@@ -229,6 +236,7 @@
         zFields.classList.toggle("hidden", !isZ);
         gFields.classList.toggle("hidden", !isG);
         z90Fields.classList.toggle("hidden", !(shapeSelect.value === "Z90"));
+        document.getElementById("z90Hint").classList.toggle("hidden", !(shapeSelect.value === "Z90"));
         shapeImage.src = shapeSelect.value === "G" ? "G.png" : shapeSelect.value === "Z90" ? "Z_rot.png" : "Z.png";
         shapeImage.alt = shapeSelect.value === "G" ? "G-shaped section" : shapeSelect.value === "Z90" ? "Rotated Z-shaped section" : "Z-shaped section";
       }
@@ -236,6 +244,15 @@
       function readNumber(id) {
         const value = Number(document.getElementById(id).value);
         return Number.isFinite(value) ? value : NaN;
+      }
+
+      // Same rules as _check_inputs in section_modulus.py: no negative lengths, and not
+      // all zero (that would divide by zero). Returns a message, or null if the values are fine.
+      function lengthError(values) {
+        if (values.some((value) => !Number.isFinite(value))) return "Enter valid values";
+        if (values.some((value) => value < 0)) return "Enter valid values: lengths cannot be negative";
+        if (values.every((value) => value === 0)) return "Enter valid values: at least one length must be above 0";
+        return null;
       }
 
       function calculate() {
@@ -250,8 +267,9 @@
           const mid = readNumber("z-mid");
           const right = readNumber("z-right");
 
-          if ([left, mid, right].some((value) => !Number.isFinite(value))) {
-            resultValue.textContent = "Enter valid values";
+          const error = lengthError([left, mid, right]);
+          if (error) {
+            resultValue.textContent = error;
             return;
           }
 
@@ -263,8 +281,9 @@
           const bot = readNumber("g-bot");
           const left = readNumber("g-left");
 
-          if ([top, right, bot, left].some((value) => !Number.isFinite(value))) {
-            resultValue.textContent = "Enter valid values";
+          const error = lengthError([top, right, bot, left]);
+          if (error) {
+            resultValue.textContent = error;
             return;
           }
 
@@ -275,8 +294,9 @@
           const mid = readNumber("z90-mid");
           const bot = readNumber("z90-bot");
 
-          if ([top, mid, bot].some((value) => !Number.isFinite(value))) {
-            resultValue.textContent = "Enter valid values";
+          const error = lengthError([top, mid, bot]);
+          if (error) {
+            resultValue.textContent = error;
             return;
           }
 
