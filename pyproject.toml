@@ -3,6 +3,7 @@ name = "section_modulus"
 version = "0.1.0"
 license = "MIT"
 description = "Section modulus of thin-walled Z, G and rotated-Z beam sections"
+keywords = ["section modulus", "second moment of area", "structural engineering", "beam", "cold-formed steel", "Z section", "purlin"]
 requires-python = ">=3.10"
 
 [project.optional-dependencies]
