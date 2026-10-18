@@ -88,3 +88,7 @@ ruff format --check .
 ```
 
 The tests compare every shape with an independent calculation (rectangles plus the parallel-axis theorem) in [tests/reference.py](tests/reference.py). The web page has its own JavaScript copy of the formulas; [tests/test_js_parity.py](tests/test_js_parity.py) runs that copy with Node.js and checks it gives the same results as Python. That test is skipped, with a message, if Node.js is not installed.
+
+## License
+
+MIT; see [LICENSE](LICENSE).

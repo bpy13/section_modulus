@@ -19,3 +19,6 @@ What was decided, why, and when. Change these only with a reason, and note the c
 ## Repository
 - 2026-10-16: Tests with pytest, lint and format with ruff, one conda env `section_modulus`.
   The JavaScript copy is checked against Python by running it with Node in a test.
+
+## Licence
+- MIT, copyright Brian Yu (2026-10-18), matching the name already on the commits. LICENSE file at the repo root.

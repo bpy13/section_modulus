@@ -1,6 +1,7 @@
 [project]
 name = "section_modulus"
 version = "0.1.0"
+license = "MIT"
 description = "Section modulus of thin-walled Z, G and rotated-Z beam sections"
 requires-python = ">=3.10"
 
